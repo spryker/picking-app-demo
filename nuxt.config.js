@@ -1,7 +1,7 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'picking-app-demo',
+    title: 'Picking App Demo',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -34,7 +34,11 @@ export default {
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    baseUrl:
+      process.env.API_URL ||
+      'https://virtserver.swaggerhub.com/Spryker/spryker-backend-api/1.0.0',
+  },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {

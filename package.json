@@ -4,11 +4,9 @@
   "private": true,
   "scripts": {
     "setup": "yarn setup:be",
-    "setup:be": "cd nodejs-server-server-generated && yarn",
-    "dev": "yarn start:be & yarn nuxt",
+    "dev": "yarn nuxt",
     "build": "nuxt build",
-    "start": "yarn start:be & nuxt start",
-    "start:be": "cd nodejs-server-server-generated && yarn start",
+    "start": "nuxt start",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
     "lint": "yarn lint:js",

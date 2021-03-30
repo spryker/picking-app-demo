@@ -1,8 +1,40 @@
 <template>
-  <div>
-    <Nuxt />
-  </div>
+  <a-layout>
+    <a-layout-header>
+      <a-page-header :title="pageTitle" :sub-title="appTitle"></a-page-header>
+    </a-layout-header>
+    <a-layout-content>
+      <Nuxt />
+    </a-layout-content>
+    <a-layout-footer>Spryker (c) {{ year }}</a-layout-footer>
+  </a-layout>
 </template>
+
+<script lang="ts">
+import Vue from 'vue'
+export default Vue.extend({
+  data: () => ({
+    updateTitle: 0,
+    year: new Date().getFullYear(),
+  }),
+  computed: {
+    appTitle() {
+      return 'Picking App Demo'
+    },
+    pageTitle() {
+      return (
+        (!this.$isServer &&
+          this.updateTitle &&
+          this.$root.$meta().refresh().metaInfo.titleChunk) ||
+        ''
+      )
+    },
+  },
+  mounted() {
+    this.updateTitle++
+  },
+})
+</script>
 
 <style>
 html {
@@ -24,32 +56,12 @@ html {
   margin: 0;
 }
 
-.button--green {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #3b8070;
-  color: #3b8070;
-  text-decoration: none;
-  padding: 10px 30px;
+#__nuxt,
+#__layoutm .ant-layout {
+  height: 100%;
 }
 
-.button--green:hover {
-  color: #fff;
-  background-color: #3b8070;
-}
-
-.button--grey {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #35495e;
-  color: #35495e;
-  text-decoration: none;
-  padding: 10px 30px;
-  margin-left: 15px;
-}
-
-.button--grey:hover {
-  color: #fff;
-  background-color: #35495e;
+.ant-layout-footer {
+  text-align: center;
 }
 </style>
