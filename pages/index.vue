@@ -87,7 +87,7 @@ export default Vue.extend({
   head: () => ({
     title: 'Orders List',
   }),
-  computed: {
+  computed: ({
     todayStart() {
       const todayStart = new Date(this.today)
       todayStart.setHours(0, 0, 0, 0)
@@ -104,6 +104,11 @@ export default Vue.extend({
     thisWeekStart() {
       return new Date(this.todayStart.getTime() - 6 * this.dayMs)
     },
+  } as any) as {
+    todayStart(): Date
+    todayEnd(): Date
+    yesterdayStart(): Date
+    thisWeekStart(): Date
   },
   created() {
     this.updateToday()

@@ -59,11 +59,11 @@ export default Vue.extend({
       orderId,
       title,
       backLink: '/',
-    }
+    } as any
   },
   head() {
     return {
-      title: this.title,
+      title: (this as any).title,
     }
   },
 })
