@@ -1,7 +1,7 @@
 <template>
   <a-row type="flex" justify="center">
     <a-col>
-      <a-list :data-source="mockOrders" item-layout="vertical">
+      <a-list :data-source="orders" item-layout="vertical">
         <a-list-item slot="renderItem" slot-scope="order">
           <a-list-item-meta>
             <NuxtLink slot="title" :to="'/order/' + order.id">
@@ -40,6 +40,7 @@
 <script lang="ts">
 /* eslint-disable camelcase */
 import Vue from 'vue'
+import { mockOrders } from './mock-orders'
 
 interface Order {
   number_of_items: number
@@ -52,8 +53,10 @@ interface Order {
 }
 
 export default Vue.extend({
-  async asyncData({ $axios }) {
-    const orders = await $axios.$get<Order[]>(`/orders`)
+  async asyncData({ $axios, $config }) {
+    const orders = $config.useApiMocks
+      ? mockOrders
+      : await $axios.$get<Order[]>(`/orders`)
 
     return { orders }
   },
@@ -63,26 +66,6 @@ export default Vue.extend({
     longDateFormatter: new Intl.DateTimeFormat('en-DE', {
       dateStyle: 'long',
     }),
-    mockOrders: [
-      {
-        id: 'DE_123456789',
-        created_at: '2021-03-23T13:42:00+0000',
-        order_reference: 'DE_123456789',
-        cusotmer_reference: 0,
-        number_of_items: 5,
-        grand_total_formatted: '$25.41',
-        status: 'ready for picking',
-      },
-      {
-        id: 'DE_14242522',
-        created_at: '2021-03-30T15:52:20+0000',
-        order_reference: 'DE_14242522',
-        cusotmer_reference: 0,
-        number_of_items: 2,
-        grand_total_formatted: '$16.30',
-        status: 'ready for delivery',
-      },
-    ],
   }),
   head: () => ({
     title: 'Orders List',

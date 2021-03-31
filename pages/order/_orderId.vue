@@ -37,6 +37,7 @@
 <script lang="ts">
 /* eslint-disable camelcase */
 import Vue from 'vue'
+import { mockOrders } from '../mock-orders'
 
 interface Order {
   number_of_items: number
@@ -49,9 +50,11 @@ interface Order {
 }
 
 export default Vue.extend({
-  async asyncData({ params, $axios }) {
+  async asyncData({ params, $axios, $config }) {
     const orderId = params.orderId
-    const order = await $axios.$get<Order[]>(`/orders/${orderId}`)
+    const order = $config.useApiMocks
+      ? mockOrders[0]
+      : await $axios.$get<Order[]>(`/orders/${orderId}`)
     const title = `Order #${orderId}`
 
     return {

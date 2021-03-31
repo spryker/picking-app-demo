@@ -33,6 +33,10 @@ export default {
     '@nuxtjs/pwa',
   ],
 
+  publicRuntimeConfig: {
+    useApiMocks: process.env.USE_API_MOCKS ?? true,
+  },
+
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     baseUrl:
