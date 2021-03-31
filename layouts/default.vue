@@ -1,10 +1,15 @@
 <template>
   <a-layout>
-    <a-layout-header>
-      <a-page-header :title="pageTitle" :sub-title="appTitle"></a-page-header>
+    <a-layout-header style="background-color: #e6e6e6">
+      <a-page-header
+        :title="pageTitle"
+        :sub-title="appTitle"
+        :back-icon="backLink ? undefined : false"
+        @back="goBack"
+      ></a-page-header>
     </a-layout-header>
     <a-layout-content>
-      <Nuxt />
+      <Nuxt ref="content" />
     </a-layout-content>
     <a-layout-footer>Spryker (c) {{ year }}</a-layout-footer>
   </a-layout>
@@ -14,8 +19,9 @@
 import Vue from 'vue'
 export default Vue.extend({
   data: () => ({
-    updateTitle: 0,
+    pageUpdated: 0,
     year: new Date().getFullYear(),
+    backLink: '',
   }),
   computed: {
     appTitle() {
@@ -24,14 +30,35 @@ export default Vue.extend({
     pageTitle() {
       return (
         (!this.$isServer &&
-          this.updateTitle &&
+          this.pageUpdated &&
           this.$root.$meta().refresh().metaInfo.titleChunk) ||
         ''
       )
     },
   },
   mounted() {
-    this.updateTitle++
+    this.pageUpdated++
+
+    this.$router.afterEach(() => {
+      // HACK: Double timer to pickup new page
+      setTimeout(() => setTimeout(() => this.pageUpdated++))
+    })
+  },
+  updated() {
+    // HACK: Wait 3 ticks until content child ref is rendered
+    setTimeout(() => setTimeout(() => setTimeout(() => this.pageRendered())))
+  },
+  methods: {
+    goBack() {
+      if (!this.backLink) return
+      this.$router.push({ path: this.backLink })
+    },
+    pageRendered() {
+      const contentComp = this.$refs.content as Vue
+      const pageComp = contentComp.$children[0] as any
+      this.backLink = pageComp?.backLink
+      this.pageUpdated++
+    },
   },
 })
 </script>
@@ -57,8 +84,13 @@ html {
 }
 
 #__nuxt,
-#__layoutm .ant-layout {
+#__layout,
+.ant-layout {
   height: 100%;
+}
+
+.ant-layout-content {
+  padding: 8px 16px;
 }
 
 .ant-layout-footer {

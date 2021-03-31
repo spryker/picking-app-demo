@@ -5,7 +5,7 @@
         <a-list-item slot="renderItem" slot-scope="order">
           <a-list-item-meta>
             <NuxtLink slot="title" :to="'/order/' + order.id">
-              Order {{ order.order_reference }}
+              Order #{{ order.order_reference }}
             </NuxtLink>
             <a-tag slot="description" color="green">
               {{ order.status }}
@@ -152,4 +152,4 @@ export default Vue.extend({
 })
 </script>
 
-<style></style>
+<style scoped></style>
