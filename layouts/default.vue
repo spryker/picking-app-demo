@@ -86,7 +86,9 @@ html {
 #__nuxt,
 #__layout,
 .ant-layout {
-  height: 100%;
+  display: flex;
+  min-height: 100%;
+  min-width: 100%;
 }
 
 .ant-layout-content {

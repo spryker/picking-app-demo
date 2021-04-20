@@ -7,7 +7,7 @@
             <NuxtLink slot="title" :to="'/order/' + order.id">
               Order #{{ order.order_reference }}
             </NuxtLink>
-            <a-tag slot="description" color="green">
+            <a-tag slot="description" :color="getOrderStatusColor(order)">
               {{ order.status }}
             </a-tag>
           </a-list-item-meta>
@@ -39,34 +39,36 @@
 
 <script lang="ts">
 /* eslint-disable camelcase */
+import { Context } from '@nuxt/types'
 import Vue from 'vue'
-import { mockOrders } from './mock-orders'
-
-interface Order {
-  number_of_items: number
-  order_reference: string
-  created_at: string
-  cusotmer_reference: string
-  id: string
-  grand_total_formatted: string
-  status: string
-}
+import { Order, OrderApiClient, OrderStatusUpdate } from '../api'
 
 export default Vue.extend({
-  async asyncData({ $axios, $config }) {
-    const orders = $config.useApiMocks
-      ? mockOrders
-      : await $axios.$get<Order[]>(`/orders`)
+  async asyncData(ctx) {
+    const orderApi = new OrderApiClient(ctx)
 
-    return { orders }
+    const orders = await orderApi.getAll()
+    const orderPendingStatusUpdates = await orderApi.getPendingStatusUpdates()
+
+    return {
+      orders,
+      orderPendingStatusUpdates,
+    }
   },
-  data: () => ({
-    dayMs: 24 * 60 * 60 * 1000,
-    today: new Date(),
-    longDateFormatter: new Intl.DateTimeFormat('en-DE', {
-      dateStyle: 'long',
-    }),
-  }),
+  data(ctx: Context): {} {
+    const orderApi = new OrderApiClient(ctx)
+    const updateOrdersBound = this.updateOrders.bind(this)
+
+    return {
+      orderApi,
+      updateOrdersBound,
+      dayMs: 24 * 60 * 60 * 1000,
+      today: new Date(),
+      longDateFormatter: new Intl.DateTimeFormat('en-DE', {
+        dateStyle: 'long',
+      }),
+    }
+  },
   head: () => ({
     title: 'Orders List',
   }),
@@ -93,6 +95,14 @@ export default Vue.extend({
     yesterdayStart(): Date
     thisWeekStart(): Date
   },
+  mounted() {
+    window.addEventListener('online', this.$data.updateOrdersBound)
+    window.addEventListener('offline', this.$data.updateOrdersBound)
+  },
+  beforeDestroy() {
+    window.removeEventListener('online', this.$data.updateOrdersBound)
+    window.removeEventListener('offline', this.$data.updateOrdersBound)
+  },
   created() {
     this.updateToday()
 
@@ -110,7 +120,7 @@ export default Vue.extend({
   },
   methods: {
     updateToday(date: Date | number = new Date()) {
-      this.today = new Date(date)
+      ;(this as any).today = new Date(date)
     },
     toReadableDate(dateStr: string): string {
       const date = new Date(dateStr)
@@ -120,7 +130,7 @@ export default Vue.extend({
         dateTime >= this.todayEnd.getTime() ||
         dateTime < this.thisWeekStart.getTime()
       ) {
-        return this.longDateFormatter.format(date)
+        return (this as any).longDateFormatter.format(date)
       }
 
       if (dateTime >= this.todayStart.getTime()) {
@@ -134,7 +144,27 @@ export default Vue.extend({
       return `${this.getDaysDiff(this.todayStart, date)} days ago`
     },
     getDaysDiff(from: Date, to: Date): number {
-      return Math.ceil(Math.abs((to.getTime() - from.getTime()) / this.dayMs))
+      return Math.ceil(
+        Math.abs((to.getTime() - from.getTime()) / (this as any).dayMs)
+      )
+    },
+    isOrderStatusUpdatePending(order: Order): boolean {
+      const orderPendingStatusUpdates: OrderStatusUpdate[] = this.$data
+        .orderPendingStatusUpdates
+
+      return orderPendingStatusUpdates.some(
+        (statusUpdate) => statusUpdate.orderId === order.id
+      )
+    },
+    getOrderStatusColor(order: Order): string {
+      return this.isOrderStatusUpdatePending(order) ? 'yellow' : 'green'
+    },
+    async updateOrders() {
+      console.log('Updating orders...')
+      const orderApi: OrderApiClient = this.$data.orderApi
+
+      this.$data.orders = await orderApi.getAll()
+      this.$data.orderPendingStatusUpdates = await orderApi.getPendingStatusUpdates()
     },
   },
 })

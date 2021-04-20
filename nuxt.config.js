@@ -34,20 +34,24 @@ export default {
   ],
 
   publicRuntimeConfig: {
-    useApiMocks: process.env.USE_API_MOCKS ?? true,
+    useApiMocks: process.env.USE_API_MOCKS ?? false,
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     baseUrl:
-      process.env.API_URL ||
-      'https://virtserver.swaggerhub.com/Spryker/spryker-backend-api/1.0.0',
+      process.env.API_URL || 'https://aqueous-ravine-18030.herokuapp.com/',
   },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {
     manifest: {
+      name: 'Picking App Demo',
       lang: 'en',
+    },
+    workbox: {
+      enabled: true,
+      importScripts: ['custom-sw.js'],
     },
   },
 
